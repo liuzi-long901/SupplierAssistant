@@ -1,6 +1,7 @@
 package cn.cloud.service;
 
 
+import cn.cloud.config.RedisUtil;
 import cn.cloud.dto.login.LoginForm;
 import cn.cloud.entity.Admin;
 import cn.cloud.entity.AdminLog;
@@ -17,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 
@@ -39,6 +41,9 @@ public class LoginService {
     @Autowired
     private HttpServletRequest httpRequest;
 
+    @Resource
+    RedisUtil redisUtil;
+
     public String login(LoginForm loginForm) {
         long startTime = System.currentTimeMillis();
         LocalDateTime now = LocalDateTime.now();
@@ -59,6 +64,16 @@ public class LoginService {
         // 登陆
         Authentication authenticate;
         try {
+            if (loginForm.getCode()!=null){
+                Object key = redisUtil.get(loginForm.getUsername());
+                if (key!=null){
+                    Admin admin =new Admin();
+                    admin.setUsername(loginForm.getUsername());
+                    authenticate = authenticationManager.authenticate(
+                            new UsernamePasswordAuthenticationToken(loginForm.getUsername(), loginForm.getCode())
+                    );
+                }
+            }
             authenticate = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginForm.getUsername(), loginForm.getPassword())
             );

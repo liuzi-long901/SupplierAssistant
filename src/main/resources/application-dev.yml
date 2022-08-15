@@ -15,7 +15,13 @@ spring:
     port: 6379
     username: redis
     password: redis
-#    password: redis
+    timeout: 5000
+#    lettuce:
+#      pool:
+#        max-active: 100
+#        min-idle: 10
+#        max-idle: 50
+  #    password: redis
   cloud:
     nacos:
       server-addr: localhost:8848 # nacos 服务地址
@@ -29,10 +35,17 @@ logging:
 
 web:
   jwt:
-    url: /api/**
-    login-url: /api/login
+    url: /api/login/**
+    login-url: /api/login/admin,/api/login/PhoneNumCode
     secret: secret
     expiration: 604800000
     header: Jwt-Authorization
 
 
+
+sms:
+  apiUrl: https://sms_developer.zhenzikj.com
+  appId: 112192
+  appSecret: 4e530e58-6284-43fd-8a4d-b95372f473a6
+  timeOut: 3
+  codeLength: 6

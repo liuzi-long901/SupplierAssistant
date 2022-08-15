@@ -1,6 +1,7 @@
 package cn.cloud.controller.api;
 
 
+import cn.cloud.config.zhenziCode;
 import cn.cloud.core.base.BaseController;
 import cn.cloud.core.rest.RestResponse;
 import cn.cloud.core.rest.RestResult;
@@ -11,11 +12,10 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 
@@ -30,7 +30,7 @@ public class LoginApiController extends BaseController {
 
 
     @ApiOperation("登陆接口")
-    @PostMapping("")
+    @PostMapping("/admin")
     public RestResult<String> login(HttpServletRequest request, @Valid LoginForm loginForm, BindingResult result) {
         if (result.hasErrors()) {
             return RestResponse.fail(this.resultErrors(result));
@@ -44,4 +44,24 @@ public class LoginApiController extends BaseController {
 
         return RestResponse.fail("login failed");
     }
+
+    @Autowired
+    private zhenziCode zhenziCode;
+
+    /***
+     * 验证手机号码 并且发送验证码
+     * @param request
+     * @param phoneNum
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/PhoneNumCode")
+    public RestResult<String> toCode(HttpServletRequest request, String phoneNum) throws Exception {
+        HttpSession session = request.getSession(true);
+        String random = zhenziCode.printRandom();
+        session.setAttribute("randStr",random);
+        return RestResponse.success(zhenziCode.sendMessage(random,phoneNum));
+    }
+
+
 }

@@ -8,6 +8,7 @@ import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.ApiKey;
 import springfox.documentation.service.Parameter;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
@@ -41,7 +42,13 @@ public class SwaggerConfig {
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cloud.controller"))
                 .paths(PathSelectors.any())
-                .build();
+                .build().securitySchemes(securitySchemes());
+    }
+
+    private List<ApiKey> securitySchemes() {
+        List<ApiKey> apiKeyList= new ArrayList();
+        apiKeyList.add(new ApiKey("Jwt-Authorization", "Jwt-Authorization", "header"));
+        return apiKeyList;
     }
 
     private ApiInfo apiInfo() {

@@ -11,7 +11,9 @@ public class LoginForm {
     @NotNull(message = "请输入用户名")
     private String username;
 
-    @ApiModelProperty(value = "密码", required = true, dataType = "String")
-    @NotNull(message = "请输入密码")
+    @ApiModelProperty(value = "密码", required = false, dataType = "String")
     private String password;
+
+    @ApiModelProperty(value = "验证码",required = false,dataType = "String")
+    private String code;
 }
