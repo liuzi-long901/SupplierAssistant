@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cloud.mapper.AdminMapper">
+    <select id="search" parameterType="AdminSearchForm" resultType="Admin">
+        SELECT * FROM `admin`
+        <where>
+            <if test="state != null">
+                AND state = #{state}
+            </if>
+            <if test="role != null">
+                AND role = #{role}
+            </if>
+            <if test="username != null">
+                AND username = #{username}
+            </if>
+        </where>
+        <choose>
+            <when test="orderby != null">
+                ORDER BY ${orderby}
+            </when>
+            <otherwise>
+                ORDER BY id
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="order != null">
+                ${order}
+            </when>
+            <otherwise>
+                DESC
+            </otherwise>
+        </choose>
+    </select>
+</mapper>

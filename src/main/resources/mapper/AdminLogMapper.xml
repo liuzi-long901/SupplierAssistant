@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cloud.mapper.AdminLogMapper">
+    <select id="search" parameterType="AdminLogSearchForm" resultType="AdminLog">
+        SELECT * FROM `admin_log`
+        <where>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+            <if test="type != null">
+                AND `type` = #{type}
+            </if>
+            <if test="ip != null">
+                AND `ip` = #{ip}
+            </if>
+            <if test="username != null">
+                AND username LIKE #{username}"%"
+            </if>
+        </where>
+        <choose>
+            <when test="orderby != null">
+                ORDER BY ${orderby}
+            </when>
+            <otherwise>
+                ORDER BY id
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="order != null">
+                ${order}
+            </when>
+            <otherwise>
+                DESC
+            </otherwise>
+        </choose>
+    </select>
+</mapper>
