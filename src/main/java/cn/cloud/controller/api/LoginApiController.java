@@ -5,6 +5,7 @@ import cn.cloud.config.zhenziCode;
 import cn.cloud.core.base.BaseController;
 import cn.cloud.core.rest.RestResponse;
 import cn.cloud.core.rest.RestResult;
+import cn.cloud.dto.login.Login;
 import cn.cloud.dto.login.LoginForm;
 import cn.cloud.service.LoginService;
 import io.swagger.annotations.Api;
@@ -30,7 +31,7 @@ public class LoginApiController extends BaseController {
 
 
     @ApiOperation("登陆接口")
-    @PostMapping("/admin")
+    @PostMapping("")
     public RestResult<String> login(HttpServletRequest request, @Valid LoginForm loginForm, BindingResult result) {
         if (result.hasErrors()) {
             return RestResponse.fail(this.resultErrors(result));
@@ -64,4 +65,19 @@ public class LoginApiController extends BaseController {
     }
 
 
+    @ApiOperation("验证码登陆接口")
+    @PostMapping("/code")
+    public RestResult<String> loginByCode(HttpServletRequest request, @Valid Login loginForm, BindingResult result) {
+        if (result.hasErrors()) {
+            return RestResponse.fail(this.resultErrors(result));
+        }
+
+        String token = loginService.loginByCode(loginForm);
+
+        if (token != null) {
+            return RestResponse.data(token);
+        }
+
+        return RestResponse.fail("login failed");
+    }
 }

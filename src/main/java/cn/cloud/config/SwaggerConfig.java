@@ -53,7 +53,7 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("cloud.message web")
+                .title("supplier-assistant web")
                 .version("1.0")
                 .build();
     }

@@ -33,16 +33,17 @@ public class zhenziCode {
         return randStr;
     }
 
-    public String sendMessage(String randNum,String phoneNum) throws Exception {
+    public String sendMessage(String code,String phoneNum) throws Exception {
         ZhenziSmsClient client = new ZhenziSmsClient(apiUrl, appId, appSecret);
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("number", phoneNum);
         params.put("templateId","10141");
-        String[] templateParams = new String[1];
-        templateParams[0] = randNum;
+        String[] templateParams = new String[2];
+        templateParams[0] = code;
+        templateParams[1] = "5分钟";
         params.put("templateParams", templateParams);
         String result = client.send(params);
-        redisUtil.set(phoneNum,randNum,5*60);
+        redisUtil.set(phoneNum,code,5*60);
         return result;
     }
 

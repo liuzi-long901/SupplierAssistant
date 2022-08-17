@@ -35,8 +35,8 @@ logging:
 
 web:
   jwt:
-    url: /api/login/**
-    login-url: /api/login/admin,/api/login/PhoneNumCode
+    url: /api/**
+    login-url: /api/login
     secret: secret
     expiration: 604800000
     header: Jwt-Authorization

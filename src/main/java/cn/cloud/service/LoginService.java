@@ -2,6 +2,7 @@ package cn.cloud.service;
 
 
 import cn.cloud.config.RedisUtil;
+import cn.cloud.dto.login.Login;
 import cn.cloud.dto.login.LoginForm;
 import cn.cloud.entity.Admin;
 import cn.cloud.entity.AdminLog;
@@ -64,16 +65,6 @@ public class LoginService {
         // 登陆
         Authentication authenticate;
         try {
-            if (loginForm.getCode()!=null){
-                Object key = redisUtil.get(loginForm.getUsername());
-                if (key!=null){
-                    Admin admin =new Admin();
-                    admin.setUsername(loginForm.getUsername());
-                    authenticate = authenticationManager.authenticate(
-                            new UsernamePasswordAuthenticationToken(loginForm.getUsername(), loginForm.getCode())
-                    );
-                }
-            }
             authenticate = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginForm.getUsername(), loginForm.getPassword())
             );
@@ -108,4 +99,58 @@ public class LoginService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return (JwtUser) authentication.getPrincipal();
     }
+
+    public String loginByCode(Login loginForm) {
+        long startTime = System.currentTimeMillis();
+        LocalDateTime now = LocalDateTime.now();
+        String requestUri = Fun.trimToDefault(httpRequest.getRequestURI(), "");
+        String queryString = Fun.trimToDefault(httpRequest.getQueryString(), "");
+        String url = Fun.empty(queryString) ? requestUri : requestUri + "?" + queryString;
+        String ip = Fun.trimToDefault(httpRequest.getRemoteAddr(),"");
+        ip = "0:0:0:0:0:0:0:1".equals(ip) ? "127.0.0.1" : ip;
+
+        AdminLog adminLog = AdminLog.builder()
+                .type("login")
+                .ip(ip)
+                .method("POST")
+                .url(url)
+                .saveTime(now)
+                .build();
+
+        // 登陆
+        Authentication authenticate = null;
+        try {
+            if (redisUtil.get(loginForm.getUsername()).toString()!=null && loginForm.getCode().equals(redisUtil.get(loginForm.getUsername()).toString())){
+                authenticate = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(loginForm.getUsername(), loginForm.getCode())
+                );
+            }
+            JwtUser jwtUser = (JwtUser) authenticate.getPrincipal();
+            SecurityContextHolder.getContext().setAuthentication(authenticate);
+            String token = jwtTokenProvider.generateTokenByString(authenticate);
+
+            // 登录日志
+            adminLog.setAdminid(jwtUser.getId());
+            adminLog.setUsername(jwtUser.getUsername());
+            adminLog.setSpendTime(System.currentTimeMillis() - startTime);
+            adminLog.setStatus(1);
+            adminLogMapper.insertSelective(adminLog);
+
+            return token;
+        } catch (Exception e) {
+            // 登陆失败日志（如密码错误）
+            Admin admin = adminMapper.selectOne(Admin.builder().username(loginForm.getUsername()).build());
+            if (admin != null) {
+                adminLog.setAdminid(admin.getId());
+                adminLog.setUsername(admin.getUsername());
+                adminLog.setSpendTime(System.currentTimeMillis() - startTime);
+                adminLog.setStatus(0);
+                adminLogMapper.insertSelective(adminLog);
+            }
+            log.warn(e.getLocalizedMessage());
+            return null;
+        }
+    }
+
+
 }
