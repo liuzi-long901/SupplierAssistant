@@ -24,7 +24,7 @@ spring:
   #    password: redis
   cloud:
     nacos:
-      server-addr: localhost:8848 # nacos 服务地址
+      server-addr: 120.48.108.48:8848 # nacos 服务地址
 #      discovery:
 #        namespace: 40df6308-4b8a-4ff1-94d2-283cf66d0a33
 

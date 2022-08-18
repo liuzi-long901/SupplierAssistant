@@ -8,6 +8,8 @@ import cn.cloud.entity.Admin;
 import cn.cloud.entity.AdminLog;
 import cn.cloud.jwt.JwtTokenProvider;
 import cn.cloud.jwt.JwtUser;
+import cn.cloud.jwt.SmsCodeAuthenticationProvider;
+import cn.cloud.jwt.SmsCodeAuthenticationToken;
 import cn.cloud.mapper.AdminLogMapper;
 import cn.cloud.mapper.AdminMapper;
 import io.github.xfuns.java.Fun;
@@ -44,6 +46,9 @@ public class LoginService {
 
     @Resource
     RedisUtil redisUtil;
+
+    @Autowired
+    private SmsCodeAuthenticationProvider smsCodeAuthenticationProvider;
 
     public String login(LoginForm loginForm) {
         long startTime = System.currentTimeMillis();
@@ -118,16 +123,17 @@ public class LoginService {
                 .build();
 
         // 登陆
-        Authentication authenticate = null;
+        Authentication authenticate;
         try {
-            if (redisUtil.get(loginForm.getUsername()).toString()!=null && loginForm.getCode().equals(redisUtil.get(loginForm.getUsername()).toString())){
-                authenticate = authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(loginForm.getUsername(), loginForm.getCode())
-                );
+            if (redisUtil.get(loginForm.getUsername()).toString()==null || !loginForm.getCode().equals(redisUtil.get(loginForm.getUsername()).toString())){
+                return null;
             }
+            authenticate = authenticationManager.authenticate(
+                    new SmsCodeAuthenticationToken(loginForm.getUsername())
+            );
             JwtUser jwtUser = (JwtUser) authenticate.getPrincipal();
             SecurityContextHolder.getContext().setAuthentication(authenticate);
-            String token = jwtTokenProvider.generateTokenByString(authenticate);
+            String token = smsCodeAuthenticationProvider.generateTokenByString(authenticate);
 
             // 登录日志
             adminLog.setAdminid(jwtUser.getId());

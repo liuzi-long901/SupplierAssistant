@@ -3,6 +3,7 @@ package cn.cloud.config;
 
 import cn.cloud.jwt.JwtAuthenticationEntryPoint;
 import cn.cloud.jwt.JwtTokenAuthFilter;
+import cn.cloud.jwt.SmsCodeAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -39,6 +40,9 @@ public class WebSecurityConfig {
 
         @Autowired
         private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
+        @Autowired
+        private SmsCodeAuthenticationProvider smsCodeAuthenticationProvider;
 
         /**
          * 默认情况下 @Bean 会被 SpringBoot 自动探测到并且加入到 Security filter chain
@@ -93,6 +97,7 @@ public class WebSecurityConfig {
         @Override
         protected void configure(AuthenticationManagerBuilder auth) throws Exception {
             auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+            auth.authenticationProvider(smsCodeAuthenticationProvider);
         }
 
         @Bean
